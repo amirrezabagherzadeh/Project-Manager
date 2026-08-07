@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import PositiveInt, SecretStr, field_validator, model_validator
+from pydantic import AliasChoices, Field, PositiveInt, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEVELOPMENT_SECRET_KEY = "development-only-insecure-key-change-me"
@@ -15,6 +15,7 @@ class Settings(BaseSettings):
         env_prefix="APP_",
         case_sensitive=False,
         extra="ignore",
+        populate_by_name=True,
     )
 
     app_name: str = "Persian Project Manager API"
@@ -33,7 +34,10 @@ class Settings(BaseSettings):
         "http://localhost:3001",
         "http://127.0.0.1:3001",
     ]
-    database_url: str = "sqlite+aiosqlite:///./storage/app.db"
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./storage/app.db",
+        validation_alias=AliasChoices("APP_DATABASE_URL", "DATABASE_URL", "POSTGRES_URL"),
+    )
     attachment_storage_path: Path = Path("./storage/uploads")
 
     secret_key: SecretStr = SecretStr(DEVELOPMENT_SECRET_KEY)
@@ -67,6 +71,15 @@ class Settings(BaseSettings):
     def reject_blank_values(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("Value must not be blank")
+        return value
+
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def use_async_postgres_driver(cls, value: str) -> str:
+        if value.startswith("postgresql://"):
+            return value.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if value.startswith("postgres://"):
+            return value.replace("postgres://", "postgresql+asyncpg://", 1)
         return value
 
     @field_validator("refresh_cookie_path")

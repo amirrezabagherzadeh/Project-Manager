@@ -5,6 +5,7 @@ description = "FastAPI foundation for the Persian project-management platform"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "aiosqlite>=0.21.0",
+    "asyncpg>=0.30.0",
     "alembic>=1.16.0",
     "fastapi[standard]>=0.116.0",
     "pwdlib[argon2]>=0.3.0",
