@@ -1,0 +1,60 @@
+schema: spec-driven
+
+context: |
+  Product: Persian RTL project-management platform for Persian-speaking teams.
+  Required source documents, read before creating or updating any artifact:
+  - AGENTS.md (agent rules and document precedence)
+  - docs/prd.1.1-backend-technical-implementation.md (backend requirements)
+  - docs/prd.1.2-frontend-technical-implementation.md (frontend requirements)
+  - docs/engineering-rules.md (quality, security, and delivery rules)
+  - docs/architecture.md (system boundaries and data model)
+  - docs/use-cases.md (user flows and end-to-end acceptance)
+  - docs/design-guidelines.md (Persian, RTL, responsive, and accessibility rules)
+
+  Architecture: Modular monolith with an independent FastAPI REST API and
+  Next.js App Router web application. Backend uses Python 3.12, Pydantic v2,
+  SQLAlchemy 2 async, Alembic, and SQLite for MVP with a clean PostgreSQL path.
+  Frontend uses TypeScript strict mode, Tailwind CSS, shadcn/ui, TanStack Query,
+  React Hook Form, Zod, and dnd-kit. Frontend types are generated from OpenAPI.
+
+  Delivery is phase-gated: 0 Foundation, 1 Auth/Database, 2 Workspace/RBAC,
+  3 Projects/Board foundation, 4 Tasks, 5 Drag and Drop, 6 Collaboration,
+  7 Project views, 8 Global dashboard/Notifications/Profile, 9 Hardening.
+  Do not create implementation tasks for a later phase until the current phase's
+  acceptance criteria and quality gates are complete.
+
+  All user-facing UI is Persian and true RTL. Permissions are enforced in the
+  backend. Business logic does not live in route handlers. All database changes
+  use Alembic. Every endpoint is documented and testable in Swagger. Store dates
+  in UTC ISO format, never commit secrets, and prefer archive for Projects/Tasks.
+
+rules:
+  proposal:
+    - Cite the governing PRD section and use-case IDs for every in-scope capability.
+    - Include explicit goals, non-goals, dependencies, risks, and rollback approach.
+    - Identify the delivery phase and do not mix unrelated phases.
+  specs:
+    - Write testable normative requirements using SHALL.
+    - Give every requirement at least one Given/When/Then scenario.
+    - Include success, validation, unauthenticated, unauthorized, and conflict scenarios where applicable.
+    - Include RTL, responsive, accessibility, loading, empty, error, and permission states for UI work.
+  design:
+    - Preserve API-Service-Repository boundaries and resource-level authorization.
+    - Describe transaction boundaries, migrations, OpenAPI impact, generated client impact, and observability.
+    - Record rejected alternatives when a choice affects PostgreSQL migration, security, or public APIs.
+  tasks:
+    - Order tasks by dependency and keep each checkbox independently verifiable.
+    - Include file or module scope, acceptance criterion, and test/quality command in each task group.
+    - Add migration, negative permission tests, OpenAPI regeneration, documentation, and changelog tasks when relevant.
+    - End each phase with the exact quality gates from AGENTS.md and openspec validate --all.
+
+operations:
+  apply:
+    guidance:
+      - Read AGENTS.md and all source documents named by the active change before editing.
+      - Implement only approved tasks from the active change and stop on a failed phase gate.
+      - Preserve user changes and update task checkboxes only after verification.
+  archive:
+    guidance:
+      - Confirm all scenarios and quality gates passed before archiving.
+      - Update CHANGELOG.md with delivered behavior, migrations, tests, and known limitations.

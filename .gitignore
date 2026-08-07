@@ -1,0 +1,44 @@
+# Environment and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Python
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+backend/storage/
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# Node.js and Next.js
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+*.tsbuildinfo
+
+# Uploads and runtime data
+storage/
+uploads/
+backend/runtime.*.log
+
+# Local Docker image exports
+docker-images/*.tar
+
+# Tooling and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

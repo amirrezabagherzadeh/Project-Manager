@@ -1,0 +1,12 @@
+overrides:
+  js-yaml@>=4.0.0 <4.3.0: 4.3.0
+  postcss@<=8.5.17: 8.5.24
+
+ignoredOptionalDependencies:
+  - sharp
+
+onlyBuiltDependencies:
+  - unrs-resolver
+
+allowBuilds:
+  unrs-resolver: true

@@ -1,0 +1,10 @@
+.env
+.env.*
+.next
+node_modules
+coverage
+playwright-report
+test-results
+e2e
+src/**/*.test.*
+src/**/*.spec.*

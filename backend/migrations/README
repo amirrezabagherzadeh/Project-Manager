@@ -1,0 +1,4 @@
+Alembic migration environment for the Backend.
+
+Phase 0 intentionally contains no revision. The first domain schema revision belongs to Phase 1.
+
