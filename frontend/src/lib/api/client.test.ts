@@ -2,6 +2,31 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { api } from "@/lib/api/client"
 
+describe("API routing", () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it("uses the same-origin Vercel backend route by default", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: { code: "invalid_credentials", message: "Invalid credentials" },
+        }),
+        { status: 401, headers: { "Content-Type": "application/json" } },
+      ),
+    )
+
+    await expect(api.login("member@example.com", "wrong-password")).rejects.toMatchObject({
+      status: 401,
+      code: "invalid_credentials",
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/backend/api/v1/auth/token",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    )
+  })
+})
+
 describe("authenticated binary downloads", () => {
   afterEach(() => vi.restoreAllMocks())
 
