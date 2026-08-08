@@ -130,7 +130,7 @@ function AuthScreen({ onAuthenticated, initialMode }: { onAuthenticated: (user: 
       const data = new FormData(form)
       const email = String(data.get("email") ?? "").trim()
       const password = String(data.get("password") ?? "")
-      if (!email.includes("@") || password.length < 8) throw new ApiError(m.auth.invalid, 422)
+      if (!email.includes("@") || password.length < (mode === "register" ? 10 : 1)) throw new ApiError(m.auth.invalid, 422, "validation_error")
       if (mode === "register") {
         return registerAndAuthenticate(String(data.get("name") ?? "").trim(), email, password)
       }
@@ -153,7 +153,16 @@ function AuthScreen({ onAuthenticated, initialMode }: { onAuthenticated: (user: 
         <form onSubmit={(event) => { event.preventDefault(); auth.mutate(event.currentTarget) }}>
           {mode === "register" ? <Field name="name" label={m.auth.name} autoComplete="name" /> : null}
           <Field name="email" label={m.auth.email} type="email" autoComplete="email" dir="ltr" />
-          <Field name="password" label={m.auth.password} type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} dir="ltr" />
+          <Field
+            name="password"
+            label={m.auth.password}
+            type="password"
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            dir="ltr"
+            minLength={mode === "register" ? 10 : 1}
+            hint={mode === "register" ? m.auth.passwordHint : undefined}
+            required
+          />
           {auth.isError ? <ErrorNote error={auth.error} /> : null}
           <button className="primary wide" disabled={auth.isPending}>{auth.isPending ? <LoaderCircle className="spin"/> : null}{mode === "login" ? m.auth.submitLogin : m.auth.submitRegister}</button>
         </form>
@@ -484,7 +493,7 @@ function ActivityPanel({ items }: { items: Activity[] }) { return <section class
 function MetricGrid({ values, loading = false }: { values: { label: string; value: number }[]; loading?: boolean }) { return <section className="metric-grid">{loading ? Array.from({ length: 4 }, (_, index) => <div className="metric-card skeleton" key={index}/>) : values.map((item) => <article className="metric-card" key={item.label}><span>{item.label}</span><strong>{new Intl.NumberFormat("fa-IR").format(item.value)}</strong><i/></article>)}</section> }
 function ComposerDialog({ type, onClose, mutation }: { type: "workspace" | "project"; onClose: () => void; mutation: { mutate: (form: HTMLFormElement) => void; isPending: boolean; isError: boolean; error: unknown } }) { return <Dialog onClose={onClose}><section className="composer-dialog"><h2>{type === "workspace" ? m.workspace.create : m.workspace.newProject}</h2><form onSubmit={(event) => { event.preventDefault(); mutation.mutate(event.currentTarget) }}><Field name="name" label={type === "workspace" ? m.workspace.name : m.workspace.projectName}/>{type === "project" ? <Field name="key" label={m.workspace.projectKey} dir="ltr"/> : <TextArea name="description" label={m.workspace.description}/>} {mutation.isError ? <ErrorNote error={mutation.error}/> : null}<button className="primary" disabled={mutation.isPending}>{m.create}</button></form></section></Dialog> }
 function Dialog({ children, onClose, className = "" }: { children: ReactNode; onClose: () => void; className?: string }) { useEffect(() => { const listener = (event: KeyboardEvent) => { if (event.key === "Escape") onClose() }; window.addEventListener("keydown", listener); return () => window.removeEventListener("keydown", listener) }, [onClose]); return <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose() }}><div className={`dialog ${className}`} role="dialog" aria-modal="true"><button className="dialog-close" aria-label={m.close} onClick={onClose}><X/></button>{children}</div></div> }
-function Field(props: { name: string; label: string; type?: string; autoComplete?: string; dir?: string; defaultValue?: string; disabled?: boolean }) { return <label className="field"><span>{props.label}</span><input {...props}/></label> }
+function Field({ label, hint, ...inputProps }: { name: string; label: string; hint?: string; type?: string; autoComplete?: string; dir?: string; defaultValue?: string; disabled?: boolean; minLength?: number; required?: boolean }) { return <label className="field"><span>{label}</span><input {...inputProps}/>{hint ? <small>{hint}</small> : null}</label> }
 function TextArea(props: { name: string; label: string; defaultValue?: string; disabled?: boolean }) { return <label className="field"><span>{props.label}</span><textarea {...props}/></label> }
 function ErrorNote({ error }: { error: unknown }) { return <p className="error-note">{errorText(error)}</p> }
 function FullLoader() { return <main className="full-loader"><div className="brand-mark"><Columns3/><span>{m.brand}</span></div><LoaderCircle className="spin"/><p>{m.loading}</p></main> }
