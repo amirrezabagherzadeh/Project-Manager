@@ -55,6 +55,12 @@ export function timelineGeometry(task: Pick<Task, "created_at" | "due_at">, rang
   return { left: (taskStart - min) / span * 100, width: Math.max(1.5, (taskEnd - taskStart) / span * 100) }
 }
 
+export async function registerAndAuthenticate(name: string, email: string, password: string) {
+  await api.register({ name, email, password })
+  await api.login(email, password)
+  return (await api.me()).data
+}
+
 async function saveAttachment(id: string, name: string) {
   const blob = await api.downloadAttachment(id)
   const url = URL.createObjectURL(blob)
@@ -119,7 +125,6 @@ export function ProductApp({ initialMode = "login", inviteToken }: { initialMode
 
 function AuthScreen({ onAuthenticated, initialMode }: { onAuthenticated: (user: User) => void; initialMode: "login" | "register" }) {
   const [mode, setMode] = useState<"login" | "register">(initialMode)
-  const [notice, setNotice] = useState("")
   const auth = useMutation({
     mutationFn: async (form: HTMLFormElement) => {
       const data = new FormData(form)
@@ -127,16 +132,12 @@ function AuthScreen({ onAuthenticated, initialMode }: { onAuthenticated: (user: 
       const password = String(data.get("password") ?? "")
       if (!email.includes("@") || password.length < 8) throw new ApiError(m.auth.invalid, 422)
       if (mode === "register") {
-        await api.register({ name: String(data.get("name") ?? "").trim(), email, password })
-        return null
+        return registerAndAuthenticate(String(data.get("name") ?? "").trim(), email, password)
       }
       await api.login(email, password)
       return (await api.me()).data
     },
-    onSuccess: (user) => {
-      if (user) onAuthenticated(user)
-      else { setMode("login"); setNotice(m.auth.registered) }
-    },
+    onSuccess: onAuthenticated,
   })
   const demo = useMutation({ mutationFn: async () => { await api.login("demo@example.com", "demo-password-change-me"); return (await api.me()).data }, onSuccess: onAuthenticated })
   return <main className="auth-page">
@@ -153,7 +154,6 @@ function AuthScreen({ onAuthenticated, initialMode }: { onAuthenticated: (user: 
           {mode === "register" ? <Field name="name" label={m.auth.name} autoComplete="name" /> : null}
           <Field name="email" label={m.auth.email} type="email" autoComplete="email" dir="ltr" />
           <Field name="password" label={m.auth.password} type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} dir="ltr" />
-          {notice ? <p className="success-note">{notice}</p> : null}
           {auth.isError ? <ErrorNote error={auth.error} /> : null}
           <button className="primary wide" disabled={auth.isPending}>{auth.isPending ? <LoaderCircle className="spin"/> : null}{mode === "login" ? m.auth.submitLogin : m.auth.submitRegister}</button>
         </form>
