@@ -1,10 +1,6 @@
-import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
-from alembic import command
-from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -30,11 +26,6 @@ class VercelServicePathMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-def run_migrations() -> None:
-    config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
-    command.upgrade(config, "head")
-
-
 def create_app(settings: Settings | None = None) -> FastAPI:
     app_settings = settings or get_settings()
     logger = configure_logging()
@@ -42,8 +33,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        if app_settings.environment == "production":
-            await asyncio.to_thread(run_migrations)
         logger.info("Application started")
         try:
             yield
