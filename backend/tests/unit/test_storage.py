@@ -7,7 +7,9 @@ from app.storage.local import LocalStorageService
 
 
 def test_local_storage_validates_and_contains_paths(tmp_path: Path) -> None:
-    storage = LocalStorageService(tmp_path / "uploads")
+    upload_root = tmp_path / "uploads"
+    storage = LocalStorageService(upload_root)
+    assert not upload_root.exists()
     name = storage.save(original_name="note.txt", content_type="text/plain", data=b"hello")
     assert storage.read(name) == b"hello"
     storage.delete(name)

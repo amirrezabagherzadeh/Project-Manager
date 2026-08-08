@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- ساخت سرویس ذخیره‌سازی فایل به‌صورت lazy انجام می‌شود تا endpointهای Comment،
+  Checklist، Activity و Attachment list روی فایل‌سیستم فقط‌خواندنی Vercel با خطای
+  `500` متوقف نشوند.
+
 ### Added
 
 - Complete PRD 1.2 frontend program: registration/login/refresh/logout and identity,

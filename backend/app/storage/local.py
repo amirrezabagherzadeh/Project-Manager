@@ -10,7 +10,6 @@ ALLOWED_CONTENT_TYPES = frozenset({"application/pdf", "image/jpeg", "image/png",
 class LocalStorageService:
     def __init__(self, root: Path) -> None:
         self._root = root.resolve()
-        self._root.mkdir(parents=True, exist_ok=True)
 
     def save(self, *, original_name: str, content_type: str, data: bytes) -> str:
         if not original_name or Path(original_name).name != original_name:
@@ -25,6 +24,7 @@ class LocalStorageService:
             raise DomainError(
                 status_code=413, code="file_too_large", message="حجم فایل بیش از حد مجاز است."
             )
+        self._root.mkdir(parents=True, exist_ok=True)
         storage_name = f"{uuid4().hex}{Path(original_name).suffix.lower()}"
         path = self._path(storage_name)
         path.write_bytes(data)
