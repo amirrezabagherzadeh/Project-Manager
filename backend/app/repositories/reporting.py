@@ -1,13 +1,17 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.elements import ColumnElement
 
 from app.models.project import Project
 from app.models.task import Task, TaskAssignee
 from app.models.workspace import ActivityLog, WorkspaceMember
+
+
+def _count_where(condition: ColumnElement[bool]) -> ColumnElement[int]:
+    return func.sum(case((condition, 1), else_=0))
 
 
 class ReportingRepository:
@@ -25,13 +29,13 @@ class ReportingRepository:
             await self.session.execute(
                 select(
                     func.count(Task.id),
-                    func.sum(Task.completed_at.is_not(None)),
-                    func.sum(
+                    _count_where(Task.completed_at.is_not(None)),
+                    _count_where(
                         (Task.due_at.is_not(None))
                         & (Task.due_at < now)
                         & (Task.completed_at.is_(None))
                     ),
-                    func.sum(
+                    _count_where(
                         (Task.due_at.is_not(None))
                         & (Task.due_at >= now)
                         & (Task.due_at <= due_soon)
@@ -113,8 +117,8 @@ class ReportingRepository:
             await self.session.execute(
                 select(
                     func.count(Task.id),
-                    func.sum(Task.completed_at.is_not(None)),
-                    func.sum(
+                    _count_where(Task.completed_at.is_not(None)),
+                    _count_where(
                         (Task.due_at.is_not(None))
                         & (Task.due_at < now)
                         & (Task.completed_at.is_(None))
