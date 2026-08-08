@@ -17,6 +17,21 @@ def test_auth_and_database_defaults_are_safe_for_local_development() -> None:
     assert settings.register_rate_limit_requests != settings.login_rate_limit_requests
 
 
+@pytest.mark.parametrize("scheme", ["postgresql", "postgres"])
+def test_neon_database_url_is_normalized_for_asyncpg(scheme: str) -> None:
+    settings = Settings(
+        environment="test",
+        database_url=(
+            f"{scheme}://user:password@db.example.neon.tech/app"
+            "?sslmode=require&channel_binding=require"
+        ),
+    )
+
+    assert settings.database_url == (
+        "postgresql+asyncpg://user:password@db.example.neon.tech/app?ssl=require"
+    )
+
+
 @pytest.mark.parametrize(
     ("overrides", "message"),
     [

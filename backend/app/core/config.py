@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic import AliasChoices, Field, PositiveInt, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -77,10 +78,22 @@ class Settings(BaseSettings):
     @classmethod
     def use_async_postgres_driver(cls, value: str) -> str:
         if value.startswith("postgresql://"):
-            return value.replace("postgresql://", "postgresql+asyncpg://", 1)
-        if value.startswith("postgres://"):
-            return value.replace("postgres://", "postgresql+asyncpg://", 1)
-        return value
+            value = value.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif value.startswith("postgres://"):
+            value = value.replace("postgres://", "postgresql+asyncpg://", 1)
+
+        if not value.startswith("postgresql+asyncpg://"):
+            return value
+
+        parts = urlsplit(value)
+        query: list[tuple[str, str]] = []
+        for key, query_value in parse_qsl(parts.query, keep_blank_values=True):
+            if key == "channel_binding":
+                continue
+            if key == "sslmode":
+                key = "ssl"
+            query.append((key, query_value))
+        return urlunsplit(parts._replace(query=urlencode(query)))
 
     @field_validator("refresh_cookie_path")
     @classmethod
