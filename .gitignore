@@ -32,6 +32,8 @@ frontend/blob-report/
 /storage/
 uploads/
 backend/runtime.*.log
+*-server.log
+*-server-error.log
 
 # Local Docker image exports
 docker-images/*.tar
