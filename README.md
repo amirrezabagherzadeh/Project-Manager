@@ -9,7 +9,7 @@
 
 **[Open the live application](https://persian-project-manager.vercel.app)** · **[View the source](https://github.com/amirrezabagherzadeh/Project-Manager)**
 
-![Persian Project Manager dashboard](docs/images/dashboard.png)
+![Persian Project Manager board with real tasks](docs/images/board-with-tasks.png)
 
 ## Overview
 
@@ -37,6 +37,26 @@ The product is built as two independent services: a Next.js web app for the expe
 - Checklists, comments, file attachments, and task activity
 - Project and global dashboards, timeline/calendar reporting, and notifications
 - A development-only demo account for a fast local walkthrough
+
+## Local product walkthrough
+
+The screenshots below were captured from the local application after seeding a real demo workspace and project.
+
+1. **Seed and sign in.** Run `uv run ppm-seed`, start both services, and choose **"ورود با حساب نمونه"**.
+2. **Open the project board.** The **راه‌اندازی محصول** project shows three real tasks, each in a different workflow column; the column headers display their task counts.
+3. **Inspect the project report.** The dashboard presents live totals for all tasks, completed work, overdue work, near-term work, and unassigned work, plus a priority distribution.
+
+### 1. Kanban board with real tasks
+
+![Local Kanban board showing three task cards](docs/images/board-with-tasks.png)
+
+The board shows **3 tasks** across `todo`, `doing`, and `review`, with visible per-column counts and priority color indicators.
+
+### 2. Project dashboard with live metrics
+
+![Local project dashboard showing task metrics](docs/images/dashboard-metrics.png)
+
+The report shows **3 total tasks**, **3 unassigned tasks**, and a one-task count for each of the high, medium, and urgent priority levels.
 
 ## Architecture
 
